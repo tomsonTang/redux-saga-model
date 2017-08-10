@@ -15,7 +15,7 @@ import Plugin from './plugin';
 
 const SEP = '/';
 
-export default function sagaModelManagerFactory(createOpts) {
+export function sagaModelManagerFactory(createOpts) {
   const {
     initialState = {},
     initialReducer = {},
@@ -43,14 +43,11 @@ export default function sagaModelManagerFactory(createOpts) {
     // properties
     _models: initialCheckModels,
     _store: null,
-    _history: null,
     _plugin: plugin,
     // methods
     use,
     model,
-    router,
     getStore,
-    history
   };
 
   return sagaModelManager;
@@ -67,16 +64,11 @@ export default function sagaModelManagerFactory(createOpts) {
     return this;
   }
 
-  function history(history) {
-    this._history = history;
-    return this;
-  }
-
   /**
-     * Register a model.
-     *
-     * @param model
-     */
+   * Register a model.
+   *
+   * @param model
+   */
   function model(model) {
     // push when before getStore
     this
@@ -184,6 +176,7 @@ export default function sagaModelManagerFactory(createOpts) {
     const reducers = {
       ...initialReducer
     };
+    
     // 遍历所有注册的 modle
     for (const m of this._models) {
       // 一个命名空间放一个根级 reducer 每个 modle.reducers 都已被打上 namespace 的印记,这里为什么还要区分呢。
@@ -427,7 +420,6 @@ export default function sagaModelManagerFactory(createOpts) {
         invariant(typeof sub === 'function', 'modelManager.getStore: subscription should be function');
         const unlistener = sub({
           dispatch: createDispatch(app._store.dispatch, model),
-          history: app._history
         }, onError);
         if (isFunction(unlistener)) {
           unlisteners.push(unlistener);
@@ -525,3 +517,5 @@ export default function sagaModelManagerFactory(createOpts) {
   }
 
 }
+
+export default sagaModelManagerFactory();
