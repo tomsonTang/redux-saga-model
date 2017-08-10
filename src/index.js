@@ -73,7 +73,7 @@ export function sagaModelManagerFactory(createOpts) {
     // push when before getStore
     this
       ._models
-      .push(checkModel(model, mobile));
+      .push(checkModel(model));
     return this;
   }
 
@@ -124,7 +124,7 @@ export function sagaModelManagerFactory(createOpts) {
     // unlisten subscrioptions
     if (_unlisteners[namespace]) {
       const {unlisteners, noneFunctionSubscriptions} = _unlisteners[namespace];
-      warning(noneFunctionSubscriptions.length === 0, `app.unmodel: subscription should return unlistener function, check these subscriptions ${noneFunctionSubscriptions.join(', ')}`,);
+      warning(noneFunctionSubscriptions.length === 0, `modelManager.unmodel: subscription should return unlistener function, check these subscriptions ${noneFunctionSubscriptions.join(', ')}`,);
       for (const unlistener of unlisteners) {
         unlistener();
       }
@@ -155,7 +155,7 @@ export function sagaModelManagerFactory(createOpts) {
           err = new Error(err);
         
         // 若发生异常将控制权交给注册了 onError 的 handler
-        onError(err, app._store.dispatch);
+        onError(err, sagaModelManager._store.dispatch);
       }
     };
 
@@ -269,20 +269,20 @@ export function sagaModelManagerFactory(createOpts) {
     };
     const {namespace, reducers, sagas} = model;
 
-    invariant(namespace, 'app.model: namespace should be defined',);
-    invariant(!app._models.some(model => model.namespace === namespace), 'app.model: namespace should be unique',);
-    invariant(!model.subscriptions || isPlainObject(model.subscriptions), 'app.model: subscriptions should be Object',);
-    invariant(!reducers || isPlainObject(reducers) || Array.isArray(reducers), 'app.model: reducers should be Object or array',);
-    invariant(!Array.isArray(reducers) || (isPlainObject(reducers[0]) && typeof reducers[1] === 'function'), 'app.model: reducers with array should be app.model({ reducers: [object, function' +
+    invariant(namespace, 'modelManager.model: namespace should be defined',);
+    invariant(!sagaModelManager._models.some(model => model.namespace === namespace), 'modelManager.model: namespace should be unique',);
+    invariant(!model.subscriptions || isPlainObject(model.subscriptions), 'modelManager.model: subscriptions should be Object',);
+    invariant(!reducers || isPlainObject(reducers) || Array.isArray(reducers), 'modelManager.model: reducers should be Object or array',);
+    invariant(!Array.isArray(reducers) || (isPlainObject(reducers[0]) && typeof reducers[1] === 'function'), 'modelManager.model: reducers with array should be modelManager.model({ reducers: [object, function' +
         '] })',);
-    invariant(!sagas || isPlainObject(sagas), 'app.model: sagas should be Object',);
+    invariant(!sagas || isPlainObject(sagas), 'modelManager.model: sagas should be Object',);
 
     function applyNamespace(type) {
       function getNamespacedReducers(reducers) {
         return Object
           .keys(reducers)
           .reduce((memo, key) => {
-            warning(key.indexOf(`${namespace}${SEP}`) !== 0, `app.model: ${type.slice(0, -1)} ${key} should not be prefixed with namespace ${namespace}`,);
+            warning(key.indexOf(`${namespace}${SEP}`) !== 0, `modelManager.model: ${type.slice(0, -1)} ${key} should not be prefixed with namespace ${namespace}`,);
             memo[`${namespace}${SEP}${key}`] = reducers[key];
             return memo;
           }, {});
@@ -484,7 +484,8 @@ export function sagaModelManagerFactory(createOpts) {
 
     return {
       ...sagaEffects,
-      put
+      put,
+      take
     };
   }
 
