@@ -21,7 +21,7 @@ export function sagaModelManagerFactory(createOpts) {
     initialReducer = {},
     initialMiddleware = [],
     initialModles = []
-  } = createOpts;
+  } = createOpts || {};
 
   const plugin = new Plugin();
 
