@@ -48,19 +48,18 @@ export class SagaModelManager {
   }
 
   filterModels(models, baseModels) {
-    return models.filter(m => {
-      let ret;
+    return models.reduce((prev,m) => {
       try {
-        ret = this.checkModel(m, baseModels);
+        prev.push(this.checkModel(m, baseModels));
       } catch (error) {
         if (process.env.NODE_ENV !== "production") {
-          return console.error(error);
+          console.error(error);
         } else {
           throw error;
         }
       }
-      return ret;
-    });
+      return prev;
+    },[]);
   }
 
   /**
@@ -197,7 +196,7 @@ export class SagaModelManager {
       delete _unlisteners[namespace];
     }
 
-    // delete model from this._models
+    // delete model
     privateProps.models = privateProps.models.filter(
       model => model.namespace !== namespace
     );
@@ -234,9 +233,9 @@ export class SagaModelManager {
   // inject model dynamically injectModel.bind(this, createReducer,
   // onErrorWrapper, unlisteners);
   injectModel(createReducer, onError, unlisteners, m) {
-    m = this.checkModel(m);
 
     const privateProps = installPrivateProperties[this.__sagaModelKey];
+    m = this.checkModel(m,privateProps.models);
 
     privateProps.models.push(m);
 
@@ -407,8 +406,8 @@ export class SagaModelManager {
 
     return {
       ...sagaEffects,
-      put,
-      take
+      put:this::put,
+      take:this::take,
     };
   }
 
@@ -627,7 +626,7 @@ export class SagaModelManager {
 
     // run subscriptions
     const unlisteners = {};
-    for (const model of this._models) {
+    for (const model of privateProps.models) {
       if (model.subscriptions) {
         unlisteners[model.namespace] = this.runSubscriptions(
           model.subscriptions,

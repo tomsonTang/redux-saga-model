@@ -1,9 +1,10 @@
 {
   "name": "redux-saga-model",
-  "version": "0.0.9414",
+  "version": "0.1.0",
   "dependencies": {
     "@types/react-router": "2.x",
     "@types/react-router-redux": "^4.0.40",
+    "babel-polyfill": "^6.23.0",
     "babel-runtime": "^6.23.0",
     "flatten": "^1.0.2",
     "global": "^4.3.2",
