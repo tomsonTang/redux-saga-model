@@ -1,6 +1,6 @@
 {
   "name": "redux-saga-model",
-  "version": "0.0.94",
+  "version": "0.0.9414",
   "dependencies": {
     "@types/react-router": "2.x",
     "@types/react-router-redux": "^4.0.40",
