@@ -27,7 +27,7 @@ const getPrivateName = () => {
  */
 const installPrivateProperties = {};
 
-export class SagaModelManager {
+export class SagaModel {
   constructor(createOpts = {}) {
     const opts = {
       initialState: {},
@@ -650,4 +650,4 @@ export class SagaModelManager {
   }
 }
 
-export default new SagaModelManager();
+export default new SagaModel();
