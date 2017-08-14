@@ -171,7 +171,7 @@ or
 
   sagaModel.use({
       onReducer:(reducer)=>{
-  		return reduceReducers(reducer, someCrossSliceReducer);
+        return reduceReducers(reducer, someCrossSliceReducer);
       },
     	//...
   })
