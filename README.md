@@ -139,6 +139,8 @@ or
 
 - 不再提供与 react，react-router 的绑定，在 dva 中可以直接 start 启动，而这里需要你自己根据实际情况进行处理， 实例化 SagaModel 后通过 sagaModel 的 `store` 方法获取配置完成的 store，自己进行下一步的处理，如需要与 react-router 进行绑定，可以参考 [`react-router-redux-saga-model`](https://github.com/tomsonTang/react-router-redux-saga-model) 以及其对应的案例。
 
+- API 的命名改变，具体如下。
+
 
 
 ## API

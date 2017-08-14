@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+node_modules/
+build/
+/src/
+.DS_Store
+*.tgz
+*.swp
+*.swo
+lerna-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
