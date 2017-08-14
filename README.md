@@ -7,7 +7,7 @@ or
 
 `yarn add redux-saga-model`
 
-# why
+## why
 
 在 redux 的初期使用中，我们在 react 组件中进行异步处理，并在 then 中同步分发 action，在 reducer 中实时更新数据，但这样容易出现冗余代码且不易于后期维护，后前我们使用了 redux-thunk ，将每个 thunk 作为异步处理的流程块 ，随着业务的复杂我们发现对于更复杂的流程控制，redux-thunk 也是力不从心，接着我们发现了 redux-saga，并对其强大的异步处理流程控制着迷，但这个时候我们发现我们的每个模块单元下的目录结构如下：
 
@@ -37,7 +37,7 @@ or
 每个 model 都有独立的维护机制，各自负责属于自己的一块 state-tree。每个 model 将对其独立的 state-tree 进行维护的 reducers 进行封装，同时把负责业务逻辑的 saga 放入 model 中，并为每个 model 增加 namespace 。看起来的确很完美，但是我们发现其中这个 model (我们统称为 saga-model) 的处理( dva )与 react 进行了捆绑，同时由于我们有一套自己实现的项目启动工具，想要将这个 saga-model 的优秀思想进行结合。故我们将其进行抽取，同时进行改造。
 
 
-# 改变
+## 改变
 
 - 独立出来的 model 处理器成为 sagaModel ，通过实例化 SagaModel 拿到 sagaModel。
 
@@ -141,7 +141,7 @@ or
 
 
 
-# API
+## API
 
 - **SagaModel** 
   model 处理器类，处理过程与 dva基本相似，入参均为可选：
@@ -291,6 +291,6 @@ or
 
 - **其他内部 API**
 
-# 用例
+## 用例
 
 [`react-router-redux-saga-model`](https://github.com/tomsonTang/react-router-redux-saga-model)
