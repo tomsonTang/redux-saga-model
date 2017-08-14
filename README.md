@@ -9,7 +9,7 @@ or
 
 # why
 
-在 redux 的初期使用中，我们在 react 组件中进行异步处理，并在 then 中同步分发 action，在 reducer 中实时更新数据，但这样容易出现冗余代码且不易于后期维护，后前我们使用了 redux-thunk ，将每个 thunk 作为异步处理的流程块 ，随着业务的复杂我们发现对于更复杂的流程控制，redux-thunk 也是力不从心，接着我们发现了 redux-saga，并对其强大的异步处理流程控制感到着迷，但这个时候我们发现我们的每个模块单元下的目录结构如下：
+在 redux 的初期使用中，我们在 react 组件中进行异步处理，并在 then 中同步分发 action，在 reducer 中实时更新数据，但这样容易出现冗余代码且不易于后期维护，后前我们使用了 redux-thunk ，将每个 thunk 作为异步处理的流程块 ，随着业务的复杂我们发现对于更复杂的流程控制，redux-thunk 也是力不从心，接着我们发现了 redux-saga，并对其强大的异步处理流程控制着迷，但这个时候我们发现我们的每个模块单元下的目录结构如下：
 
 ```
 |
@@ -69,7 +69,7 @@ or
 
   可以发现与 dva 的 model 基本一致，但是把 dva 中的 model 的 `effects` 字段换成了 `sagas` 因为根据 redux-saga 的官方文档介绍，这个叫法更符合其用意。
 
-  通理，在 plugins 中，也将 dva 中的 `onEffect` 改成了 `onSaga`。
+  同理，在 plugins 中，也将 dva 中的 `onEffect` 改成了 `onSaga`。
 
   ```javascript
   this.hooks = {
@@ -84,6 +84,58 @@ or
   };
   ```
 
+- 在每个 model 内的 saga，默认执行类型是 `takeEvery` 可以像 dva 一样将每个 saga 传入数组格式，更换其执行类型：
+
+  ```javascript
+  {
+    namespace:'index',
+    state:{
+      name:'Tim'
+    },
+    reducers:{
+      update:function(state,{payload}){
+        return{ ...state,name:payload.name };
+      }
+    },
+    sagas:{
+      updateName:[*({payload},effects)=>{
+        yield effects.put({
+            type:'update',
+            payload,
+          });
+      },{ type: 'takeLatest' }],
+      updateAddress:[*({payload},effects)=>{
+        yield //...
+      },{ type: 'takeLatest' }]
+    }
+  }
+  ```
+
+  支持的类型与 dva 相同 `watcher` `takeLatest` `throttle` `takeEvery` 默认是 `takeEvery`
+  在 dva 中，每个 saga 都允许省略当前 model 的 namespace 前缀直接分发( put )当前 reducer 的名字作为 actionType ，但是同样的特性不支持 take( 在 `watcher` 中自己决定接受什么 action)，这里将其改进为支持该特性。
+
+  ```javascript
+  {
+    namespace:'index',
+    state:{
+      name:'Tim'
+    },
+    reducers:{
+      update:function(state,{payload}){
+        return{ ...state,name:payload.name };
+      }
+    },
+    sagas:{
+      watchUpdateName:[*({payload},effects)=>{
+        yield effects.take('update_name');
+        yield effects.put({
+            type:'update',
+            payload,
+          });
+      },{ type: 'watcher' }],
+  }
+  ```
+
 - 不再提供与 react，react-router 的绑定，在 dva 中可以直接 start 启动，而这里需要你自己根据实际情况进行处理， 实例化 SagaModel 后通过 sagaModel 的 `store` 方法获取配置完成的 store，自己进行下一步的处理，如需要与 react-router 进行绑定，可以参考 [`react-router-redux-saga-model`](https://github.com/tomsonTang/react-router-redux-saga-model) 以及其对应的案例。
 
 
@@ -93,26 +145,149 @@ or
 - **SagaModel** 
   model 处理器类，处理过程与 dva基本相似，入参均为可选：
   - initialState  :Object  传入 createStore 的默认 state
+
   - initialReducer  :Object  不包含在 model 中的其他 reducers
+
   - initialMiddleware :Array  其他 middleware， logging 等各种
+
   - initialModels :Array  在获取 store 时启动所有的 model，正常情况下推荐使用改默认入参将所有的 model 进行启动，如果需要异步启动可以使用 `sagaModel.register` 方法。
+
   - history  :Object 通过 [`history`](https://github.com/ReactTraining/history) 构造的实例，可以用于在 model 的 substrtions 中使用。
+
+  ```javascript
+  import {SagaModel} from 'redux-saga-model';
+  const sagaModel = new SagaModel({initialState, initialReducer, initialMiddleware, initialModels,history});
+
+  const store = sagaModel.store();
+  ```
+
 - **sagaModel.use**
   使用插件
+
+  ```javascript
+  import sagaModel from 'redux-saga-model';
+  import someCrossSliceReducer from 'somewhere';
+  import reduceReducers from 'reduce-reducers'
+
+  sagaModel.use({
+      onReducer:(reducer)=>{
+  		return reduceReducers(reducer, someCrossSliceReducer);
+      },
+    	//...
+  })
+  ```
+
+  插件类型：如[前面所述](https://github.com/tomsonTang/redux-saga-model#改变)，基本与 dva 一致，除了把 `onEffect` 改成了 `onSaga` 。
+
+  ```javascript
+  hooks = {
+    onError: [],
+    onStateChange: [],
+    onAction: [],
+    onHmr: [],
+    onReducer: [],
+    onSaga: [],
+    extraReducers: [],
+    extraEnhancers: [],
+  }
+  ```
+
 - **sagaModel.plugin**
   获取所有插件
+
+  ```javascript
+  import sagaModel from 'redux-saga-model';
+
+  const plugins = sagaModel.plugin();
+  ```
+
 - **sagaModel.setHistory**
   设置 history
+
+  ```javascript
+  import createBrowserHistory from "history/createBrowserHistory";
+  import sagaModel from 'redux-saga-model';
+
+  sagaModel.setHistory(createBrowserHistory());
+  ```
+
 - **sagaModel.history**
   获取 history
+
+  ```jsx
+  import createBrowserHistory from "history/createBrowserHistory";
+  import {ConnectedRouter} from "react-router-redux";
+  import sagaModel from 'redux-saga-model';
+
+  sagaModel.setHistory(createBrowserHistory());
+
+  export default (props)=>{
+      return (
+      	<ConnectedRouter history={sagaModel.history()}>
+            { props.children }
+          </ConnectedRouter>
+      );
+  }
+  ```
+
 - **sagaModel.store**
    获取配置完成的 store，并启动所有的已存在的 models
+
+   ```jsx
+   import {Provider} from "react-redux";
+   import APP from './app';
+
+   export default ()=>{
+       return (
+         <Provider store={sagaModel.store()}>
+           <APP />
+         </Provider>
+     );
+   }
+   ```
+
 - **sagaModel.register**
-   注册一个 model，可以在调用 `store` 方法前或则调用后使用
+   注册一个 model，可以在任何时刻调用。
+
+   ```javascript
+   import userModel from 'users/userModel';
+   import indexModel from 'index/indexModel';
+   import todoModel from 'todo/todoModel';
+
+   sagaModel.register(indexModel);
+
+   const store = sagaModel.store();
+
+   sagaModel.register(todoModel);
+
+   new Promise((resolve,reject)=>{
+       setTimeout(()=>{
+           sagaModel.register(userModel);
+         	resolve();
+       },1000);
+   });
+   ```
+
 - **sagaModel.dump**
   卸载一个指定 namespace 的 model
+
+  ```javascript
+  import userModel from 'users/userModel';
+  import sagaModel from 'redux-saga-model';
+
+  sagaModel.register(userModel);
+  sagaModel.dump(userModel.namespace);
+  ```
+
 - **sagaModel.models**
   获取所有的 models
+
+  ```javascript
+  import sagaModel from 'redux-saga-model';
+
+  console.log(sagaModel.models().length);
+  ```
+
 - **其他内部 API**
 
 # 用例
