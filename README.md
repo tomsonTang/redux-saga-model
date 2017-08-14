@@ -103,7 +103,7 @@ or
             type:'update',
             payload,
           });
-      },{ type: 'takeLatest' }],
+      },{ type: 'takeEvery' }],
       updateAddress:[*({payload},effects)=>{
         yield //...
       },{ type: 'takeLatest' }]
