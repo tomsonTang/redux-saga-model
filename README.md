@@ -127,6 +127,7 @@ or
     },
     sagas:{
       watchUpdateName:[*({payload},effects)=>{
+        // yield effects.take('index/update_name');
         yield effects.take('update_name');
         yield effects.put({
             type:'update',
