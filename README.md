@@ -236,6 +236,7 @@ or
 
    ```jsx
    import {Provider} from "react-redux";
+   import sagaModel from 'redux-saga-model';
    import APP from './app';
 
    export default ()=>{
@@ -251,6 +252,7 @@ or
    注册一个 model，可以在任何时刻调用。
 
    ```javascript
+   import sagaModel from 'redux-saga-model';
    import userModel from 'users/userModel';
    import indexModel from 'index/indexModel';
    import todoModel from 'todo/todoModel';
