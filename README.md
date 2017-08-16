@@ -299,4 +299,8 @@ or
 
 ## 用例
 
-[`react-router-redux-saga-model`](https://github.com/tomsonTang/react-router-redux-saga-model)
+[react-router-redux-saga-model](https://github.com/tomsonTang/react-router-redux-saga-model)
+
+## 指南
+
+[redux-saga-model-tutorial](https://github.com/tomsonTang/redux-saga-model-tutorial)

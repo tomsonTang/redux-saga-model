@@ -2,6 +2,10 @@
 .vscode/
 node_modules/
 build/
+example/
+assets/
+config/
+public/
 /src/
 .DS_Store
 *.tgz
