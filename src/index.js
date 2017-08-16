@@ -157,12 +157,12 @@ export class SagaModel {
 
   /**
    *  dump a model
-   * 
-   * @param {any} createReducer 
-   * @param {any} reducers 
-   * @param {any} _unlisteners 
-   * @param {any} namespace 
-   * @returns 
+   *
+   * @param {any} createReducer
+   * @param {any} reducers
+   * @param {any} _unlisteners
+   * @param {any} namespace
+   * @returns
    * @memberof sagaModelManager
    */
   dump(createReducer, reducers, _unlisteners, namespace) {
@@ -398,7 +398,7 @@ export class SagaModel {
             `sagas.take: ${pattern} should not be prefixed with namespace ${model.namespace}`
           );
         } else {
-          return sagaEffects.take(this.prefixType(type, model));
+          return sagaEffects.take(this.prefixType(pattern, model));
         }
       }
       return sagaEffects.take(pattern);
@@ -455,12 +455,14 @@ export class SagaModel {
      */
     function* sagaWithCatch(...args) {
       try {
-        yield saga(...args.concat(this.createEffects(model)));
+        // 让 每个 saga 内部的 this 可以执行 对应的 model
+        yield saga.call(model,...args.concat(this.createEffects(model)));
       } catch (e) {
         onError(e);
       }
     }
 
+    // 让 sagaWithCatch 内部的 this 执行外部的 this
     sagaWithCatch = this::sagaWithCatch;
 
     // saga hooks onEffect : Array
@@ -508,8 +510,8 @@ export class SagaModel {
   }
 
   /**
-   * 
-   * @returns 
+   *
+   * @returns
    */
   store() {
     const privateProps = installPrivateProperties[this.__sagaModelKey];

@@ -1,7 +1,7 @@
 # redux-saga-model
 此项目为从 [`dva`](https://github.com/dvajs/dva) 中抽取出对 model 的处理。
 
-`npm i redux-saga-model`
+`npm i --save redux-saga-model`
 
 or 
 
@@ -136,6 +136,8 @@ or
       },{ type: 'watcher' }],
   }
   ```
+
+- 为每个 saga 内部的 this 提供指向当前的 model。
 
 - 不再提供与 react，react-router 的绑定，在 dva 中可以直接 start 启动，而这里需要你自己根据实际情况进行处理， 实例化 SagaModel 后通过 sagaModel 的 `store` 方法获取配置完成的 store，自己进行下一步的处理，如需要与 react-router 进行绑定，可以参考 [`react-router-redux-saga-model`](https://github.com/tomsonTang/react-router-redux-saga-model) 以及其对应的案例。
 
