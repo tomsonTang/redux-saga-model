@@ -611,9 +611,6 @@ export class SagaModel {
       );
     }
 
-    // extend store
-    store.runSaga = sagaMiddleware.run;
-    store.asyncReducers = {};
 
     // store change
     const listeners = plugin.get("onStateChange");
@@ -645,8 +642,14 @@ export class SagaModel {
       onErrorWrapper,
       unlisteners
     );
-
     this.dump = this.dump.bind(this, createReducer, reducers, unlisteners);
+
+    // extend store
+    store.runSaga = sagaMiddleware.run;
+    store.asyncReducers = {};
+    store.register = this::this.register;
+    store.dump = this::this.dump;
+
 
     return store;
   }

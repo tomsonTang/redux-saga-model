@@ -1,5 +1,5 @@
 export default {
-  namespace: "users/ui/editableTable",
+  namespace: "users/ui",
   state: {},
   reducers: {},
   sagas: {

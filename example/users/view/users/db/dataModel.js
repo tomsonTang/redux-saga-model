@@ -62,6 +62,7 @@ export default {
     updateOne({ list }, { payload }) {
       return {
         list: filterAndUpdateList(list, {
+          key: payload.key,
           name: payload.name,
           age: payload.age,
           address: payload.address

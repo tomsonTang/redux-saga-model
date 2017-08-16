@@ -1,20 +1,20 @@
 export const onCellChange = (user)=>{
   return{
-    type:'users/ui/editableTable/onCellChange',
+    type:'users/ui/onCellChange',
     payload:user
   }
 }
 
 export const onDelete = (user)=>{
   return{
-    type:'users/ui/editableTable/onDelete',
+    type:'users/ui/onDelete',
     payload:user
   }
 }
 
 export const handleAdd = (user)=>{
   return{
-    type:'users/ui/editableTable/handleAdd',
+    type:'users/ui/handleAdd',
     payload:user
   }
 }

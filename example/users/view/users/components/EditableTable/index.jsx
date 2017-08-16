@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import EditableCell from "../EditableCell/index.jsx";
 import { namespace } from "../../db/dataModel.js";
-import * as action from "./action.js";
+import * as action from "../../action.js";
 
 const columns = [
   {
