@@ -48,7 +48,7 @@ export class SagaModel {
   }
 
   filterModels(models, baseModels) {
-    return models.reduce((prev,m) => {
+    return models.reduce((prev, m) => {
       try {
         prev.push(this.checkModel(m, baseModels));
       } catch (error) {
@@ -59,7 +59,7 @@ export class SagaModel {
         }
       }
       return prev;
-    },[]);
+    }, []);
   }
 
   /**
@@ -233,9 +233,8 @@ export class SagaModel {
   // inject model dynamically injectModel.bind(this, createReducer,
   // onErrorWrapper, unlisteners);
   injectModel(createReducer, onError, unlisteners, m) {
-
     const privateProps = installPrivateProperties[this.__sagaModelKey];
-    m = this.checkModel(m,privateProps.models);
+    m = this.checkModel(m, privateProps.models);
 
     privateProps.models.push(m);
 
@@ -282,27 +281,37 @@ export class SagaModel {
 
     const unlisteners = [];
     const noneFunctionSubscriptions = [];
-    for (const key in subs) {
-      if (Object.prototype.hasOwnProperty.call(subs, key)) {
-        const sub = subs[key];
-        invariant(
-          typeof sub === "function",
-          "modelManager.getStore: subscription should be function"
-        );
-        const unlistener = sub(
-          {
-            dispatch: this.createDispatch(privateProps.store.dispatch, model),
-            history: privateProps.history
-          },
-          onError
-        );
-        if (isFunction(unlistener)) {
-          unlisteners.push(unlistener);
-        } else {
-          noneFunctionSubscriptions.push(key);
+
+    const run = (sub,key) => {
+      const unlistener = sub(
+        {
+          dispatch: this.createDispatch(privateProps.store.dispatch, model),
+          history: privateProps.history
+        },
+        onError
+      );
+      if (isFunction(unlistener)) {
+        unlisteners.push(unlistener);
+      } else {
+        noneFunctionSubscriptions.push(key);
+      }
+    };
+
+    if (isFunction(subs)) {
+      run(subs,'_only');
+    } else {
+      for (const key in subs) {
+        if (Object.prototype.hasOwnProperty.call(subs, key)) {
+          const sub = subs[key];
+          invariant(
+            typeof sub === "function",
+            "modelManager.getStore: subscription should be function"
+          );
+          run(sub,key);
         }
       }
     }
+
     return { unlisteners, noneFunctionSubscriptions };
   }
 
@@ -406,8 +415,8 @@ export class SagaModel {
 
     return {
       ...sagaEffects,
-      put:this::put,
-      take:this::take,
+      put: this::put,
+      take: this::take
     };
   }
 
@@ -456,7 +465,7 @@ export class SagaModel {
     function* sagaWithCatch(...args) {
       try {
         // 让 每个 saga 内部的 this 可以执行 对应的 model
-        yield saga.call(model,...args.concat(this.createEffects(model)));
+        yield saga.call(model, ...args.concat(this.createEffects(model)));
       } catch (e) {
         onError(e);
       }
@@ -611,7 +620,6 @@ export class SagaModel {
       );
     }
 
-
     // store change
     const listeners = plugin.get("onStateChange");
     for (const listener of listeners) {
@@ -627,6 +635,9 @@ export class SagaModel {
     const unlisteners = {};
     for (const model of privateProps.models) {
       if (model.subscriptions) {
+        if (typeof model.subscriptions === "function") {
+        }
+
         unlisteners[model.namespace] = this.runSubscriptions(
           model.subscriptions,
           model,
@@ -649,7 +660,6 @@ export class SagaModel {
     store.asyncReducers = {};
     store.register = this::this.register;
     store.dump = this::this.dump;
-
 
     return store;
   }
