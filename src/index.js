@@ -518,6 +518,10 @@ export class SagaModel {
     return saga;
   }
 
+  openReduxDevtool(){
+    process.env.REDUX_DEVTOOLS_STATUS = "open";
+  }
+
   /**
    *
    * @returns
@@ -591,11 +595,14 @@ export class SagaModel {
     ];
 
     let devtools = () => noop => noop;
-    if (
-      process.env.NODE_ENV !== "production" &&
-      window.__REDUX_DEVTOOLS_EXTENSION__
-    ) {
-      devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
+
+    if(window.__REDUX_DEVTOOLS_EXTENSION__){
+      if(process.env.NODE_ENV !== "production"){
+        devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
+      }
+      else if(process.env.REDUX_DEVTOOLS_STATUS === "open"){
+        devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
+      }
     }
 
     const enhancers = [
