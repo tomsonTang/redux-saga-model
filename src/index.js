@@ -282,7 +282,7 @@ export class SagaModel {
     const unlisteners = [];
     const noneFunctionSubscriptions = [];
 
-    const run = (sub,key) => {
+    const run = (sub, key) => {
       const unlistener = sub(
         {
           dispatch: this.createDispatch(privateProps.store.dispatch, model),
@@ -298,7 +298,7 @@ export class SagaModel {
     };
 
     if (isFunction(subs)) {
-      run(subs,'_only');
+      run(subs, "_only");
     } else {
       for (const key in subs) {
         if (Object.prototype.hasOwnProperty.call(subs, key)) {
@@ -307,7 +307,7 @@ export class SagaModel {
             typeof sub === "function",
             "modelManager.getStore: subscription should be function"
           );
-          run(sub,key);
+          run(sub, key);
         }
       }
     }
@@ -460,12 +460,16 @@ export class SagaModel {
     /**
      * 封装 saga 对抛出的异常进行处理
      *
-     * @param {any} args action
+     * @param {any} action action
      */
-    function* sagaWithCatch(...args) {
+    function* sagaWithCatch(action) {
       try {
         // 让 每个 saga 内部的 this 可以执行 对应的 model
-        yield saga.call(model, ...args.concat(this.createEffects(model)));
+        yield saga.call(
+          model,
+          action,
+          this.createEffects(model)
+        );
       } catch (e) {
         onError(e);
       }
@@ -477,7 +481,7 @@ export class SagaModel {
     // saga hooks onEffect : Array
     const onSaga = privateProps.plugin.get("onSaga");
     // 将每个 saga 进行 AOP 封装
-    const sagaWithOnEffect = this.applyOnEffect(
+    const sagaWithOnSaga = this.applyOnSaga(
       onSaga,
       sagaWithCatch,
       model,
@@ -489,15 +493,15 @@ export class SagaModel {
         return sagaWithCatch;
       case "takeLatest":
         return function*() {
-          yield takeLatest(key, sagaWithOnEffect);
+          yield takeLatest(key, sagaWithOnSaga);
         };
       case "throttle":
         return function*() {
-          yield throttle(ms, key, sagaWithOnEffect);
+          yield throttle(ms, key, sagaWithOnSaga);
         };
       default:
         return function*() {
-          yield takeEvery(key, sagaWithOnEffect);
+          yield takeEvery(key, sagaWithOnSaga);
         };
     }
   }
@@ -505,20 +509,20 @@ export class SagaModel {
   /**
    * 对每一个 saga 进行链式封装
    *
-   * @param {any} fns onEffect hooks
+   * @param {any} fns onSaga hooks
    * @param {any} saga sagaWithCatch
    * @param {any} model
-   * @param {any} key sagaName
+   * @param {any} key sagaName/actionType
    * @returns
    */
-  applyOnEffect(fns, saga, model, key) {
+  applyOnSaga(fns, saga, model, key) {
     for (const fn of fns) {
       saga = fn(saga, sagaEffects, model, key);
     }
     return saga;
   }
 
-  openReduxDevtool(){
+  openReduxDevtool() {
     process.env.REDUX_DEVTOOLS_STATUS = "open";
   }
 
@@ -596,11 +600,10 @@ export class SagaModel {
 
     let devtools = () => noop => noop;
 
-    if(window.__REDUX_DEVTOOLS_EXTENSION__){
-      if(process.env.NODE_ENV !== "production"){
+    if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+      if (process.env.NODE_ENV !== "production") {
         devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
-      }
-      else if(process.env.REDUX_DEVTOOLS_STATUS === "open"){
+      } else if (process.env.REDUX_DEVTOOLS_STATUS === "open") {
         devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
       }
     }

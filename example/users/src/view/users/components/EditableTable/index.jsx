@@ -3,7 +3,8 @@ import { Table, Input, Icon, Button, Popconfirm } from "antd";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import EditableCell from "../EditableCell/index.jsx";
-import { namespace } from "../../db/dataModel.js";
+import { namespace as dbNamespace } from "../../db/dataModel.js";
+import { namespace as uiNamespace } from "./viewModel.js";
 import * as action from "../../action.js";
 
 const columns = [
@@ -97,7 +98,7 @@ class EditableTable extends React.Component {
     });
   };
   render() {
-    const { dataSource } = this.props;
+    const { dataSource,loading } = this.props;
 
     const columns = this.columns;
     return (
@@ -109,7 +110,7 @@ class EditableTable extends React.Component {
         >
           新增
         </Button>
-        <Table bordered dataSource={dataSource} columns={columns} />
+        <Table bordered dataSource={dataSource} columns={columns} loading={loading}/>
       </div>
     );
   }
@@ -120,11 +121,12 @@ const mapDispatchToProps = dispatch => {
 };
 
 const mapStateToProps = state => {
-  const usersState = state[namespace];
+  const usersState = state[dbNamespace];
 
   return {
     dataSource: usersState.list,
-    count: usersState.count
+    count: usersState.count,
+    loading:state.loading.models[dbNamespace] || state.loading.models[uiNamespace]
   };
 };
 

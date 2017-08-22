@@ -1,15 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import {Provider} from 'react-redux'
+import "antd/dist/antd.css";
+import loading from 'redux-saga-model-loading';
 import {SagaModel} from "../../../src";
 import Layout from "./view/layout/index.jsx";
 import UsersTable from "./view/users/index.jsx";
-import {Provider} from 'react-redux'
-import "antd/dist/antd.css";
 import usersModels from './view/users/model.js';
 
 const sagaModel = new SagaModel({
   initialModels:[...usersModels],
 });
+
+sagaModel.use(loading);
 
 // 设置打开 redux-devtools
 sagaModel.openReduxDevtool();

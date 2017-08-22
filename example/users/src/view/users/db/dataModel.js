@@ -106,7 +106,7 @@ export default {
   },
   sagas: {
     *getUsers({ payload }, effects) {
-      yield delay(100);
+      yield delay(1000);
       yield effects.put({
         type: "addBatch",
         payload: {
@@ -115,6 +115,7 @@ export default {
       });
     },
     *deleteUser({ payload }, effects) {
+      yield delay(1000);
       // 查看是否存在该用户
       const hasUser = yield effects.select((state, key) => {
         return state[this.namespace].list.some(user => {

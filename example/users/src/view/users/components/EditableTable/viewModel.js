@@ -1,18 +1,28 @@
+import {LOADING} from 'redux-saga-model-loading'
+const namespace = "users/ui";
+
+export {
+  namespace
+};
+
 export default {
-  namespace: "users/ui",
+  namespace,
   state: {},
   reducers: {},
   sagas: {
     *onCellChange({ payload }, effects) {
       return yield effects.put({
         type: "users/db/updateUser",
-        payload
+        payload,
       });
     },
     *onDelete({ payload }, effects) {
       return yield effects.put({
         type: "users/db/deleteUser",
-        payload
+        payload,
+        meta:{
+          [LOADING]:true
+        }
       });
     },
     *handleAdd({ payload }, effects) {

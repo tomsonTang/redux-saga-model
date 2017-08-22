@@ -2640,6 +2640,12 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
+flux-standard-action@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/flux-standard-action/-/flux-standard-action-1.2.0.tgz#d2d41612dde4cebddd11a76cfead8e84fc69ebdc"
+  dependencies:
+    lodash "^4.0.0"
+
 for-in@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
@@ -2957,13 +2963,9 @@ html-comment-regex@^1.1.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/html-comment-regex/-/html-comment-regex-1.1.1.tgz#668b93776eaae55ebde8f3ad464b307a4963625e"
 
-html-entities@1.2.0:
+html-entities@1.2.0, html-entities@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/html-entities/-/html-entities-1.2.0.tgz#41948caf85ce82fed36e4e6a0ed371a6664379e2"
-
-html-entities@^1.2.0:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/html-entities/-/html-entities-1.2.1.tgz#0df29351f0721163515dfb9e5543e5f6eed5162f"
 
 html-minifier@^3.2.3:
   version "3.5.3"
@@ -5245,6 +5247,12 @@ redux-devtools@^3.4.0:
     lodash "^4.2.0"
     prop-types "^15.5.7"
     redux-devtools-instrument "^1.0.1"
+
+redux-saga-model-loading@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/redux-saga-model-loading/-/redux-saga-model-loading-0.0.3.tgz#d3a94cafd8b6d9ff553727ad81401a784586e7e5"
+  dependencies:
+    flux-standard-action "^1.2.0"
 
 redux-saga-model@^0.1.31:
   version "0.1.31"

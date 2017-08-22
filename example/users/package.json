@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "redux-saga-model-loading": "^0.0.3"
+  },
   "peerDependencies": {
     "react": "15.x"
   },
