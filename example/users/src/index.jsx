@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {SagaModel} from "../../src";
+import {SagaModel} from "../../../src";
 import Layout from "./view/layout/index.jsx";
 import UsersTable from "./view/users/index.jsx";
 import {Provider} from 'react-redux'
