@@ -1,5 +1,5 @@
 import { delay } from "redux-saga";
-import * as userServices from '../services/users.js';
+import * as userServices from "../services/users.js";
 
 function filterAndUpdateList(list, payload) {
   return list.map(user => {
@@ -15,14 +15,13 @@ function filterAndUpdateList(list, payload) {
 
 const namespace = "users/db";
 
-export {
-  namespace
-}
+export { namespace };
 
 export default {
   namespace,
   state: {
     list: [],
+    maxKey: 0,
     count: 0
   },
   reducers: {
@@ -32,49 +31,54 @@ export default {
       };
     },
     delectOne({ list }, { payload }) {
-
-      const index = list.findIndex((user)=>{
+      const index = list.findIndex(user => {
         return user.key === payload.key;
       });
 
+      const newList = [...list.slice(0, index), ...list.slice(index + 1)];
+
       return {
-        list: [...list.slice(0,index),...list.slice(index+1)],
-        count: list.length - 1
+        list: newList,
+        count: list.length - 1,
+        maxKey: newList[newList.length - 1].key
       };
     },
-    addOne({ list }, { payload }) {
+    addOne({ list, maxKey }, { payload }) {
+      maxKey++;
+
       return {
         list: [
           ...list,
           {
             ...payload,
-            key: list.length + 1,
+            key: maxKey
           }
         ],
-        count: list.length + 1
+        count: list.length + 1,
+        maxKey
       };
     },
-    addBatch({ list }, { payload }) {
+    addBatch({ list: stateList }, { payload: { list } }) {
       return {
-        list: [...list, ...payload.list],
-        count: list.length + payload.list.length
+        list: [...stateList, ...list],
+        count: stateList.length + list.length,
+        maxKey: list[list.length - 1].key
       };
     },
     clearAll({ list }, { payload }) {
-      return { list: [],count:0 };
+      return { list: [], count: 0, maxKey: 0 };
     }
   },
   sagas: {
     *getUsers({ payload }, effects) {
-
       // 从 services 获取数据
-      const users = (yield userServices.getUsers()).map((user)=>{
+      const users = (yield userServices.getUsers()).map(user => {
         return {
-          name:user.name,
-          phone:user.phone,
-          website:user.website,
-          key:user.id
-        }
+          name: user.name,
+          phone: user.phone,
+          website: user.website,
+          key: user.id
+        };
       });
 
       yield effects.put({
@@ -89,7 +93,7 @@ export default {
       // 查看是否存在该用户
       const hasUser = yield effects.select((state, key) => {
         return state[this.namespace].list.some(user => {
-          return (user.key === key);
+          return user.key === key;
         });
       }, payload.key);
 
@@ -103,7 +107,7 @@ export default {
       // 查看是否存在该用户
       const hasUser = yield effects.select((state, key) => {
         return state[this.namespace].list.some(user => {
-          return (user.key === key);
+          return user.key === key;
         });
       }, payload.key);
 
@@ -123,7 +127,7 @@ export default {
       // 查看是否存在该用户
       const hasUser = yield effects.select((state, key) => {
         return state[this.namespace].list.some(user => {
-          return (user.key === key);
+          return user.key === key;
         });
       }, payload.key);
 
