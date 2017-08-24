@@ -1,38 +1,5 @@
 import { delay } from "redux-saga";
-
-const defaultUsers = [
-  {
-    key: "0",
-    name: "lulu",
-    age: "18",
-    address: "London No. 1 Lake Park",
-  },
-  {
-    key: "1",
-    name: "lala",
-    age: "28",
-    address: "New York No. 1 Lake Park",
-  },
-  {
-    key: "2",
-    name: "Jim Green",
-    age: "23",
-    address: "New York No. 1 Lake Park",
-  },
-  {
-    key: "3",
-    name: "John Brown",
-    age: "22",
-    address: "London No. 1 Lake Park",
-  },
-  {
-    key: "4",
-    name: "Joe Black",
-    age: "38",
-    address: "Sidney No. 1 Lake Park",
-  }
-
-];
+import * as userServices from '../services/users.js';
 
 function filterAndUpdateList(list, payload) {
   return list.map(user => {
@@ -61,12 +28,7 @@ export default {
   reducers: {
     updateOne({ list }, { payload }) {
       return {
-        list: filterAndUpdateList(list, {
-          key: payload.key,
-          name: payload.name,
-          age: payload.age,
-          address: payload.address
-        })
+        list: filterAndUpdateList(list, payload)
       };
     },
     delectOne({ list }, { payload }) {
@@ -85,10 +47,8 @@ export default {
         list: [
           ...list,
           {
+            ...payload,
             key: list.length + 1,
-            name: payload.name,
-            age: payload.age,
-            address: payload.address,
           }
         ],
         count: list.length + 1
@@ -106,11 +66,21 @@ export default {
   },
   sagas: {
     *getUsers({ payload }, effects) {
-      yield delay(1000);
+
+      // 从 services 获取数据
+      const users = (yield userServices.getUsers()).map((user)=>{
+        return {
+          name:user.name,
+          phone:user.phone,
+          website:user.website,
+          key:user.id
+        }
+      });
+
       yield effects.put({
         type: "addBatch",
         payload: {
-          list: defaultUsers
+          list: users
         }
       });
     },

@@ -22,22 +22,22 @@ const columns = [
     }
   },
   {
-    title: "age",
-    dataIndex: "age",
+    title: "phone",
+    dataIndex: "phone",
     render: function(text, record, index) {
       return (
-        <EditableCell value={text} onChange={this.onCellChange(index, "age")} />
+        <EditableCell value={text} onChange={this.onCellChange(index, "phone")} />
       );
     }
   },
   {
-    title: "address",
-    dataIndex: "address",
+    title: "website",
+    dataIndex: "website",
     render: function(text, record, index) {
       return (
         <EditableCell
           value={text}
-          onChange={this.onCellChange(index, "address")}
+          onChange={this.onCellChange(index, "website")}
         />
       );
     }
@@ -93,8 +93,8 @@ class EditableTable extends React.Component {
   handleAdd = () => {
     this.props.handleAdd({
       name: "",
-      age: "",
-      address: ""
+      phone: "",
+      website: ""
     });
   };
   render() {
