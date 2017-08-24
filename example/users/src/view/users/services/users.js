@@ -1,10 +1,10 @@
-import featch from "isomorphic-fetch";
+import fetch from "isomorphic-fetch";
 
-const fakingURL = "http://jsonplaceholder.typicode.com";
+const fakingURL = "https://jsonplaceholder.typicode.com";
 const getAllUsers = `${fakingURL}/users`;
 
-function toJSON(featchP) {
-  return featchP.then(checkStatus).then(parseJSON).catch(error => {
+function toJSON(fetchP) {
+  return fetchP.then(checkStatus).then(parseJSON).catch(error => {
     console.log("request failed", error);
   });
 }
@@ -27,4 +27,4 @@ function parseJSON(response) {
   return response.json();
 }
 
-export const getUsers = () => toJSON(featch(getAllUsers));
+export const getUsers = () => toJSON(fetch(getAllUsers));
