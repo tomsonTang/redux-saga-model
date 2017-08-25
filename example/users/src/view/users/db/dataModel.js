@@ -1,5 +1,5 @@
 import { delay } from "redux-saga";
-import * as userServices from "../services/users.js";
+import * as userServices from "../../../services/users.js";
 
 function filterAndUpdateList(list, payload) {
   return list.map(user => {
