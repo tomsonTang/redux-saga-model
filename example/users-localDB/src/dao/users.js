@@ -9,35 +9,6 @@ const adapter = new LocalStorage("db", {
 
 const db = low(adapter);
 
-const TYPE = {
-  READ: 0,
-  WRITE: 1
-};
-
-function resolve(value) {
-  return Promise.resolve(value);
-}
-
-function reject(e) {
-  return Promise.reject(e);
-}
-
-function promiseWithTry(value, type) {
-  try {
-    return resolve(type ? value.write() : value.value());
-  } catch (e) {
-    return reject(e);
-  }
-}
-
-function write(value) {
-  return promiseWithTry(value, TYPE.WRITE);
-}
-
-function read(value) {
-  return promiseWithTry(value, TYPE.READ);
-}
-
 function list() {
   return db.get("list");
 }

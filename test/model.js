@@ -1,5 +1,0 @@
-describe('SagaModel',function(){
-
-  describe('')
-
-});

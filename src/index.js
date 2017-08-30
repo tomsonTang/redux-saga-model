@@ -365,13 +365,7 @@ export class SagaModel {
    */
   prefixType(type, model) {
     const prefixedType = `${model.namespace}${SEP}${type}`;
-    if (
-      (model.reducers && model.reducers[prefixedType]) ||
-      (model.sagas && model.sagas[prefixedType])
-    ) {
-      return prefixedType;
-    }
-    return type;
+    return prefixedType;
   }
 
   /**
