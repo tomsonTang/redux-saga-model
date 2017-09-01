@@ -52,11 +52,7 @@ export class SagaModel {
       try {
         prev.push(this.checkModel(m, baseModels));
       } catch (error) {
-        if (process.env.NODE_ENV !== "production") {
-          console.error(error);
-        } else {
-          throw error;
-        }
+        console.error(error);
       }
       return prev;
     }, []);
@@ -417,7 +413,7 @@ export class SagaModel {
       if (typeof pattern === "string") {
         // 如果是想 take 当前命名空间的话加上 namespace
 
-        if(namespace){
+        if (namespace) {
           return sagaEffects.take(`${namespace}${SEP}${pattern}`);
         }
 
@@ -615,9 +611,16 @@ export class SagaModel {
     let devtools = () => noop => noop;
 
     if (window.__REDUX_DEVTOOLS_EXTENSION__) {
-      if (process.env.NODE_ENV !== "production") {
-        devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
-      } else if (process.env.REDUX_DEVTOOLS_STATUS === "open") {
+      const openReduxDevTools = [
+        // 实例化参数
+        privateProps.openReduxDevTools,
+        // openReduxDevtool 方法
+        process.env.REDUX_DEVTOOLS_STATUS === "open",
+        // localStroge
+        JSON.parse(localStorage.getItem("reduxDevTools"))
+      ].some(status => status);
+
+      if (openReduxDevTools) {
         devtools = window.__REDUX_DEVTOOLS_EXTENSION__;
       }
     }
