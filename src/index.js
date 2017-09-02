@@ -78,8 +78,8 @@ export class SagaModel {
       "modelManager.model: namespace should be unique"
     );
     invariant(
-      !model.subscriptions || isPlainObject(model.subscriptions),
-      "modelManager.model: subscriptions should be Object"
+      !model.subscriptions || isPlainObject(model.subscriptions) || isFunction(model.subscriptions),
+      "modelManager.model: subscriptions should be Object or Function"
     );
     invariant(
       !reducers || isPlainObject(reducers) || Array.isArray(reducers),
@@ -662,9 +662,6 @@ export class SagaModel {
     const unlisteners = {};
     for (const model of privateProps.models) {
       if (model.subscriptions) {
-        if (typeof model.subscriptions === "function") {
-        }
-
         unlisteners[model.namespace] = this.runSubscriptions(
           model.subscriptions,
           model,

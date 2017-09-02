@@ -6,7 +6,7 @@
   "dependencies": {
     "isomorphic-fetch": "^2.2.1",
     "lowdb": "^0.17.2",
-    "redux-saga-model-loading": "^0.0.3"
+    "redux-saga-model-loading": "^0.0.5"
   },
   "peerDependencies": {
     "react": "15.x"

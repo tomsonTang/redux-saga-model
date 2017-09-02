@@ -5262,9 +5262,9 @@ redux-devtools@^3.4.0:
     prop-types "^15.5.7"
     redux-devtools-instrument "^1.0.1"
 
-redux-saga-model-loading@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.npmjs.org/redux-saga-model-loading/-/redux-saga-model-loading-0.0.3.tgz#d3a94cafd8b6d9ff553727ad81401a784586e7e5"
+redux-saga-model-loading@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.npmjs.org/redux-saga-model-loading/-/redux-saga-model-loading-0.0.5.tgz#ecda20793a8dc2f13e44c3834242cd262e0d98f5"
   dependencies:
     flux-standard-action "^1.2.0"
 
