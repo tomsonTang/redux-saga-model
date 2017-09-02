@@ -271,7 +271,7 @@ export class SagaModel {
     const privateProps = installPrivateProperties[this.__sagaModelKey];
 
     invariant(
-      !privateProps.history,
+      privateProps.history,
       "modelManager.history: cant not be null or undefined"
     );
 
