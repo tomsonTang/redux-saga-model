@@ -1,9 +1,11 @@
-import sagaModel from "redux-saga-model";
+import sagaModel from "../../../src";
 import model, { namespace } from "./model.js";
 
-sagaModel.register(model);
-
 const store = sagaModel.store();
+
+sagaModel.register([model]);
+
+
 
 function dispatch() {
   store.dispatch({
@@ -12,8 +14,8 @@ function dispatch() {
   });
 }
 
-dispatch();
 
+dispatch();
 setTimeout(()=>{
   console.log('after 2s\n');
   dispatch();

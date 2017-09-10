@@ -78,7 +78,9 @@ export class SagaModel {
       "modelManager.model: namespace should be unique"
     );
     invariant(
-      !model.subscriptions || isPlainObject(model.subscriptions) || isFunction(model.subscriptions),
+      !model.subscriptions ||
+        isPlainObject(model.subscriptions) ||
+        isFunction(model.subscriptions),
       "modelManager.model: subscriptions should be Object or Function"
     );
     invariant(
@@ -137,8 +139,16 @@ export class SagaModel {
   register(model) {
     const privateProps = installPrivateProperties[this.__sagaModelKey];
 
+    const privatePropsModels = privateProps.models;
+    if (!Array.isArray(model)) {
+      model = [model];
+    }
+
     // push when before getStore
-    privateProps.models.push(this.checkModel(model, privateProps.models));
+    model.forEach(m => {
+      privatePropsModels.push(this.checkModel(m, privatePropsModels));
+    });
+
     return this;
   }
 
@@ -224,33 +234,40 @@ export class SagaModel {
    * @param {any} createReducer
    * @param {any} onError
    * @param {any} unlisteners
-   * @param {any} m
+   * @param {any} model
    */
   // inject model dynamically injectModel.bind(this, createReducer,
   // onErrorWrapper, unlisteners);
-  injectModel(createReducer, onError, unlisteners, m) {
+  injectModel(createReducer, onError, unlisteners, model) {
     const privateProps = installPrivateProperties[this.__sagaModelKey];
-    m = this.checkModel(m, privateProps.models);
-
-    privateProps.models.push(m);
-
+    const privatePropsModels = privateProps.models;
     const store = privateProps.store;
 
-    // reducers
-    store.asyncReducers[m.namespace] = this.getReducer(m.reducers, m.state);
-    store.replaceReducer(createReducer(store.asyncReducers));
-    // sagas
-    if (m.sagas) {
-      store.runSaga(this.getSaga(m.sagas, m, onError));
+    if (!Array.isArray(model)) {
+      model = [model];
     }
-    // subscriptions
-    if (m.subscriptions) {
-      unlisteners[m.namespace] = this.runSubscriptions(
-        m.subscriptions,
-        m,
-        onError
-      );
-    }
+
+    model.forEach(m => {
+      m = this.checkModel(m, privatePropsModels);
+
+      privatePropsModels.push(m);
+
+      // reducers
+      store.asyncReducers[m.namespace] = this.getReducer(m.reducers, m.state);
+      store.replaceReducer(createReducer(store.asyncReducers));
+      // sagas
+      if (m.sagas) {
+        store.runSaga(this.getSaga(m.sagas, m, onError));
+      }
+      // subscriptions
+      if (m.subscriptions) {
+        unlisteners[m.namespace] = this.runSubscriptions(
+          m.subscriptions,
+          m,
+          onError
+        );
+      }
+    });
   }
 
   /**
