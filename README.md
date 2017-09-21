@@ -39,7 +39,7 @@ or
 
 ## 改变
 
-- 独立出来的 model 处理器成为 sagaModel ，通过实例化 SagaModel 拿到 sagaModel。
+- 独立出来的 model 处理器称为 sagaModel ，通过实例化 SagaModel 拿到 sagaModel。
 
 - 可以很明显的入参 `initialState` `initialReducer` `initialMiddleware` 而不需要 dva 那样晦涩。
 
@@ -254,6 +254,10 @@ or
 
 - **sagaModel.register**
    注册一个 model，可以在任何时刻调用。
+   sagaModel.register(models,hot) :
+
+   - models : 可以是单个 model 也可以是数组形式的 models
+   - hot :任意非空值 这里的非空是指 not undefined ，not null 你可以设置为 true 或时间戳等任意格式，这里的 hot 代表是否处于热替换状态下，当且仅当在获取 store 后注册 model ,处于热替换状态且下会存在重新执行指定代码块的情况故会重新注册 model。若非热替换状态下(不传 hot 参数)重复注册相同 model则会引发 `namespace 重复 ` 异常。
 
    ```javascript
    import sagaModel from 'redux-saga-model';
@@ -266,6 +270,8 @@ or
    const store = sagaModel.store();
 
    sagaModel.register(todoModel);
+
+   //sagaModel.register([indexModel,todoModel]);
 
    new Promise((resolve,reject)=>{
        setTimeout(()=>{
@@ -296,6 +302,22 @@ or
   ```
 
 - **其他内部 API**
+
+- **store 上的挂载**
+   为了支持方便的异步注册，在 store 上挂载了 `register` 和 `dump` 方法
+
+   ```javascript
+   import sagaModel from 'redux-saga-model';
+   const store = sagaModel.store();
+
+   //somewhere
+   const {register,dump} = store;
+
+   //somewhere maybe react
+   const {register,dump} = this.props.context.store;
+   ```
+
+   ​
 
 ## 用例
 
