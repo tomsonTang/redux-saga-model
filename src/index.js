@@ -63,9 +63,10 @@ export class SagaModel {
    *
    * @param {any} m model
    * @param {any} baseModels 已存在的 models
+   * @param hot 是否热加载，如果是热加载则不重新运行对应的 model
    * @returns
    */
-  checkModel(m, baseModels) {
+  checkModel(m, baseModels, hot) {
     // Clone model to avoid prefixing namespace multiple times
     const model = {
       ...m
@@ -73,10 +74,14 @@ export class SagaModel {
     const { namespace, reducers, sagas } = model;
 
     invariant(namespace, "modelManager.model: namespace should be defined");
-    invariant(
-      !baseModels.some(model => model.namespace === namespace),
-      "modelManager.model: namespace should be unique"
-    );
+
+    // 非热加载时需要判断是否已存在特定的 namespace
+    hot ||
+      invariant(
+        !baseModels.some(model => model.namespace === namespace),
+        "modelManager.model: namespace should be unique"
+      );
+
     invariant(
       !model.subscriptions ||
         isPlainObject(model.subscriptions) ||
@@ -87,6 +92,7 @@ export class SagaModel {
       !reducers || isPlainObject(reducers) || Array.isArray(reducers),
       "modelManager.model: reducers should be Object or array"
     );
+
     invariant(
       !Array.isArray(reducers) ||
         (isPlainObject(reducers[0]) && typeof reducers[1] === "function"),
@@ -146,7 +152,7 @@ export class SagaModel {
 
     // push when before getStore
     model.forEach(m => {
-      privatePropsModels.push(this.checkModel(m, privatePropsModels));
+      privatePropsModels.push(this.checkModel(m, privatePropsModels, false));
     });
 
     return this;
@@ -235,10 +241,11 @@ export class SagaModel {
    * @param {any} onError
    * @param {any} unlisteners
    * @param {any} model
+   * @param hot 是否热加载，如果是热加载则不重新运行对应的 model
    */
   // inject model dynamically injectModel.bind(this, createReducer,
   // onErrorWrapper, unlisteners);
-  injectModel(createReducer, onError, unlisteners, model) {
+  injectModel(createReducer, onError, unlisteners, model, hot) {
     const privateProps = installPrivateProperties[this.__sagaModelKey];
     const privatePropsModels = privateProps.models;
     const store = privateProps.store;
@@ -248,7 +255,7 @@ export class SagaModel {
     }
 
     model.forEach(m => {
-      m = this.checkModel(m, privatePropsModels);
+      m = this.checkModel(m, privatePropsModels,hot);
 
       privatePropsModels.push(m);
 
@@ -257,6 +264,14 @@ export class SagaModel {
       store.replaceReducer(createReducer(store.asyncReducers));
       // sagas
       if (m.sagas) {
+        // 注销原先的 saga
+        if(hot){
+          Object.keys(m.sagas).forEach((key)=>{
+            store.dispatch({
+              type:`${key}/@@CANCEL_EFFECTS`
+            });
+          });
+        }
         store.runSaga(this.getSaga(m.sagas, m, onError));
       }
       // subscriptions
@@ -341,12 +356,12 @@ export class SagaModel {
     return function*() {
       for (const key in sagas) {
         if (Object.prototype.hasOwnProperty.call(sagas, key)) {
-          // 对每个 effect 进行封装
+          // 对每个 saga 进行封装
           const watcher = _self.getWatcher(key, sagas[key], model, onError);
           const task = yield sagaEffects.fork(watcher);
           // 当 model 被卸载时取消任务。
           yield sagaEffects.fork(function*() {
-            yield sagaEffects.take(`${model.namespace}/@@CANCEL_EFFECTS`);
+            yield sagaEffects.take(`${key}/@@CANCEL_EFFECTS`);
             yield sagaEffects.cancel(task);
           });
         }

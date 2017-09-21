@@ -1,6 +1,6 @@
 {
   "name": "redux-saga-model",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "dependencies": {
     "flatten": "^1.0.2",
     "global": "^4.3.2",
