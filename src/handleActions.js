@@ -1,4 +1,3 @@
-
 function identify(value) {
   return value;
 }
@@ -12,15 +11,16 @@ function identify(value) {
  *
  * @param {any} actionType
  * @param {any} [reducer=identify]
+ * @param {any} ctx 执行 reducer 的上下文
  * @returns
  */
-function handleAction(actionType, reducer = identify) {
+function handleAction(actionType, reducer = identify, ctx) {
   return (state, action) => {
     const { type } = action;
     if (type && actionType !== type) {
       return state;
     }
-    return reducer(state, action);
+    return reducer.call(ctx, state, action);
   };
 }
 
@@ -43,7 +43,7 @@ function reduceReducers(...reducers) {
        *  @param {any} r reducer
        */
       (p, r) => r(p, current),
-      previous,
+      previous
     );
 }
 
@@ -52,10 +52,13 @@ function reduceReducers(...reducers) {
  *
  * @param {{ actionType:reducer }} handlers
  * @param {any} defaultState
+ * @param {any} ctx 执行  handle 的上下文
  * @returns
  */
-function handleActions(handlers, defaultState) {
-  const reducers = Object.keys(handlers).map(type => handleAction(type, handlers[type]));
+function handleActions(handlers, defaultState, ctx) {
+  const reducers = Object.keys(handlers).map(type =>
+    handleAction(type, handlers[type], ctx)
+  );
   // 将 reducer 包装成调用链，这里有个问题：
   // 由于这个链式调用并不保障每次 reducers 对 state 进行更新时，链内只有一个 reducer 响应 actionType。
   // 导致的结果是如果有多个 reducer 对同一 actionType 进行响应的话，无法保证这些 reducers 之间的调用顺序。

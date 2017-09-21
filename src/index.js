@@ -260,7 +260,7 @@ export class SagaModel {
       privatePropsModels.push(m);
 
       // reducers
-      store.asyncReducers[m.namespace] = this.getReducer(m.reducers, m.state);
+      store.asyncReducers[m.namespace] = this.getReducer(m.reducers, m.state,m);
       store.replaceReducer(createReducer(store.asyncReducers));
       // sagas
       if (m.sagas) {
@@ -289,13 +289,14 @@ export class SagaModel {
    * 将 model.reducers 进行组合成一个统一对外的 reducer
    * @param {*} reducers model.reducers
    * @param {*} state model.state 维护的数据表
+   * @param {*} model model
    */
-  getReducer(reducers, state) {
+  getReducer(reducers, state,model) {
     // Support reducer enhancer e.g. reducers: [realReducers, enhancer]
     if (Array.isArray(reducers)) {
-      return reducers[1](handleActions(reducers[0], state));
+      return reducers[1](handleActions(reducers[0], state,model));
     } else {
-      return handleActions(reducers || {}, state);
+      return handleActions(reducers || {}, state,model);
     }
   }
 
@@ -611,7 +612,7 @@ export class SagaModel {
     // 遍历所有注册的 model
     for (const m of privateProps.models) {
       // 一个命名空间放一个根级 reducer 每个 model.reducers 都已被打上 namespace 的印记,这里为什么还要区分呢。
-      reducers[m.namespace] = this.getReducer(m.reducers, m.state);
+      reducers[m.namespace] = this.getReducer(m.reducers, m.state,m);
       // sagas 不是必须的
       if (m.sagas) sagas.push(this.getSaga(m.sagas, m, onErrorWrapper));
     }

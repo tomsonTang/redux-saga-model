@@ -9,6 +9,7 @@ export default {
   },
   reducers: {
     add(state, { payload }) {
+      console.log(this);
       return { num: state.num + payload };
     }
   },
