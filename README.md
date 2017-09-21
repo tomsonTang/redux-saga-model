@@ -258,7 +258,7 @@ or
 
    - models : 可以是单个 model 也可以是数组形式的 models
    - hot :任意非空值 这里的非空是指 not undefined ，not null 你可以设置为 true 或时间戳等任意格式，这里的 hot 代表是否处于热替换状态下，当且仅当在获取 store 后注册 model ,处于热替换状态且下会存在重新执行指定代码块的情况故会重新注册 model。若非热替换状态下(不传 hot 参数)重复注册相同 model则会引发 `namespace 重复 ` 异常。
-
+   
    ```javascript
    import sagaModel from 'redux-saga-model';
    import userModel from 'users/userModel';
