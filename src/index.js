@@ -79,7 +79,7 @@ export class SagaModel {
     hot ||
       invariant(
         !baseModels.some(model => model.namespace === namespace),
-        "modelManager.model: namespace should be unique"
+        `modelManager.model: namespace should be unique :${model.namespace}`
       );
 
     invariant(
@@ -255,7 +255,12 @@ export class SagaModel {
     }
 
     model.forEach(m => {
-      m = this.checkModel(m, privatePropsModels,hot);
+      try {
+        m = this.checkModel(m, privatePropsModels,hot);
+      } catch (e) {
+        console.error('if use webpack please use register with hot parameter');
+        return;
+      }
 
       privatePropsModels.push(m);
 
