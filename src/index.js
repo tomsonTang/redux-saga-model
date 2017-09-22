@@ -79,7 +79,7 @@ export class SagaModel {
     hot ||
       invariant(
         !baseModels.some(model => model.namespace === namespace),
-        `modelManager.model: namespace should be unique :${model.namespace}`
+        `modelManager.model: namespace should be unique :${model.namespace} ,if use webpack please use register with hot parameter`
       );
 
     invariant(
@@ -174,6 +174,7 @@ export class SagaModel {
    * @param {any} reducers
    * @param {any} _unlisteners
    * @param {any} namespace
+   * @param {any} m model
    * @returns
    * @memberof sagaModelManager
    */
@@ -186,10 +187,17 @@ export class SagaModel {
     delete store.asyncReducers[namespace];
     delete reducers[namespace];
     store.replaceReducer(createReducer(store.asyncReducers));
-    store.dispatch({ type: "@@saga-model/UPDATE" });
+    store.dispatch({
+      type: "@@saga-model/UPDATE"
+    });
 
-    // Cancel effects
-    store.dispatch({ type: `${namespace}/@@CANCEL_EFFECTS` });
+    // Cancel sagas
+    m.sagas &&
+      Object.keys(m.sagas).forEach(key => {
+        store.dispatch({
+          type: `${key}/@@CANCEL_EFFECTS`
+        });
+      });
 
     // unlisten subscrioptions
     if (_unlisteners[namespace]) {
@@ -212,6 +220,8 @@ export class SagaModel {
     privateProps.models = privateProps.models.filter(
       model => model.namespace !== namespace
     );
+
+    console.log(privateProps.models);
 
     return this;
   }
@@ -256,27 +266,46 @@ export class SagaModel {
 
     model.forEach(m => {
       try {
-        m = this.checkModel(m, privatePropsModels,hot);
+        m = this.checkModel(m, privatePropsModels, hot);
       } catch (e) {
-        console.error('if use webpack please use register with hot parameter');
+        console.error(e);
+        console.error(`${m.namespace} register failed`);
+        // 不打断系统流程 只是中断当前对应的 model 注册
         return;
       }
 
+      // 如果是热替换且已存在对应的 namespace 则重新缓存
+      let index = -1;
+      if (hot) {
+        privatePropsModels.some((model, i) => {
+          return model.namespace === m.namespace ? ((index = i), true) : false;
+        });
+      }
+      if (index >= 0) {
+        m.sagas &&
+          Object.keys(m.sagas).forEach(key => {
+            store.dispatch({
+              type: `${key}/@@CANCEL_EFFECTS`
+            });
+          });
+
+        // delete model
+        privatePropsModels.splice(index,1);
+      }
       privatePropsModels.push(m);
 
       // reducers
-      store.asyncReducers[m.namespace] = this.getReducer(m.reducers, m.state,m);
+      store.asyncReducers[m.namespace] = this.getReducer(
+        m.reducers,
+        m.state,
+        m
+      );
       store.replaceReducer(createReducer(store.asyncReducers));
+      store.dispatch({
+        type: "@@saga-model/UPDATE"
+      });
       // sagas
       if (m.sagas) {
-        // 注销原先的 saga
-        if(hot){
-          Object.keys(m.sagas).forEach((key)=>{
-            store.dispatch({
-              type:`${key}/@@CANCEL_EFFECTS`
-            });
-          });
-        }
         store.runSaga(this.getSaga(m.sagas, m, onError));
       }
       // subscriptions
@@ -296,12 +325,12 @@ export class SagaModel {
    * @param {*} state model.state 维护的数据表
    * @param {*} model model
    */
-  getReducer(reducers, state,model) {
+  getReducer(reducers, state, model) {
     // Support reducer enhancer e.g. reducers: [realReducers, enhancer]
     if (Array.isArray(reducers)) {
-      return reducers[1](handleActions(reducers[0], state,model));
+      return reducers[1](handleActions(reducers[0], state, model));
     } else {
-      return handleActions(reducers || {}, state,model);
+      return handleActions(reducers || {}, state, model);
     }
   }
 
@@ -346,7 +375,10 @@ export class SagaModel {
       }
     }
 
-    return { unlisteners, noneFunctionSubscriptions };
+    return {
+      unlisteners,
+      noneFunctionSubscriptions
+    };
   }
 
   /**
@@ -478,15 +510,15 @@ export class SagaModel {
   }
 
   /**
-     * 针对每个 saga 进行处理
-     * 最终返回一个生成器
-     *
-     * @param {any} key saga.key 已被打上 namespace 的 tag
-     * @param {any} _saga saga.value
-     * @param {any} model
-     * @param {any} onError
-     * @returns
-     */
+   * 针对每个 saga 进行处理
+   * 最终返回一个生成器
+   *
+   * @param {any} key saga.key 已被打上 namespace 的 tag
+   * @param {any} _saga saga.value
+   * @param {any} model
+   * @param {any} onError
+   * @returns
+   */
   getWatcher(key, _saga, model, onError) {
     let saga = _saga;
     let type = "takeEvery";
@@ -617,7 +649,7 @@ export class SagaModel {
     // 遍历所有注册的 model
     for (const m of privateProps.models) {
       // 一个命名空间放一个根级 reducer 每个 model.reducers 都已被打上 namespace 的印记,这里为什么还要区分呢。
-      reducers[m.namespace] = this.getReducer(m.reducers, m.state,m);
+      reducers[m.namespace] = this.getReducer(m.reducers, m.state, m);
       // sagas 不是必须的
       if (m.sagas) sagas.push(this.getSaga(m.sagas, m, onErrorWrapper));
     }
