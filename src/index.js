@@ -191,8 +191,12 @@ export class SagaModel {
       type: "@@saga-model/UPDATE"
     });
 
+    const m = privateProps.models.filter((model)=>{
+      return model.namespace === namespace
+    });
+
     // Cancel sagas
-    m.sagas &&
+    m &&
       Object.keys(m.sagas).forEach(key => {
         store.dispatch({
           type: `${key}/@@CANCEL_EFFECTS`
