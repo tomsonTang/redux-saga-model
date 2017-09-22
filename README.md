@@ -314,7 +314,7 @@ or
    const {register,dump} = store;
 
    //somewhere maybe react
-   const {register,dump} = this.props.context.store;
+   const {register,dump} = this.context.store;
    ```
 
    ​
