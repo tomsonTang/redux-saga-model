@@ -1,20 +1,21 @@
-import { createStore, applyMiddleware, compose, combineReducers } from "redux";
-import createSagaMiddleware from "redux-saga/lib/internal/middleware";
-import * as sagaEffects from "redux-saga/effects";
-import isPlainObject from "is-plain-object";
-import invariant from "invariant";
-import warning from "warning";
 import flatten from "flatten";
-import window from "global/window";
 import document from "global/document";
+import window from "global/window";
+import invariant from "invariant";
+import isPlainObject from "is-plain-object";
+import isFunction from "lodash.isfunction";
+import { applyMiddleware, combineReducers, compose, createStore } from "redux";
+import * as sagaEffects from "redux-saga/effects";
+import createSagaMiddleware from "redux-saga/lib/internal/middleware";
 import {
   takeEveryHelper as takeEvery,
   takeLatestHelper as takeLatest,
   throttleHelper as throttle
 } from "redux-saga/lib/internal/sagaHelpers";
-import isFunction from "lodash.isfunction";
+import warning from "warning";
 import handleActions from "./handleActions";
 import Plugin from "./plugin";
+
 
 const SEP = "/";
 
@@ -758,6 +759,7 @@ export class SagaModel {
     store.asyncReducers = {};
     store.register = this::this.register;
     store.dump = this::this.dump;
+    store.use = this::this.use;
 
     return store;
   }

@@ -178,6 +178,9 @@ or
       onReducer:(reducer)=>{
         return reduceReducers(reducer, someCrossSliceReducer);
       },
+      onError:(error,dispatch)=>{
+        // ... 统一捕获所有异常
+      }
     	//...
   })
   ```
