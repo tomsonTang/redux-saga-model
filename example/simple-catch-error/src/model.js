@@ -19,7 +19,9 @@ export default {
       console.log('get action',action);
       yield delay(1000);
 
-      throw new Error('hahah')
+      const a;
+
+      const i = a.a;
 
       yield effects.put({
         type:'add',

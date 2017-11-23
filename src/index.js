@@ -16,7 +16,6 @@ import warning from "warning";
 import handleActions from "./handleActions";
 import Plugin from "./plugin";
 
-
 const SEP = "/";
 
 const getPrivateName = () => {
@@ -35,6 +34,7 @@ export class SagaModel {
       initialReducer: {},
       initialMiddleware: [],
       initialModels: [],
+      preff: "",
       ...createOpts
     };
 
@@ -68,6 +68,12 @@ export class SagaModel {
    * @returns
    */
   checkModel(m, baseModels, hot) {
+    const privateProps = installPrivateProperties[this.__sagaModelKey];
+
+    // 预置前缀
+    if (privateProps.preff) {
+      m.namespace = `${privateProps.preff}${SEP}${m.namespace}`;
+    }
     // Clone model to avoid prefixing namespace multiple times
     const model = {
       ...m
@@ -80,7 +86,9 @@ export class SagaModel {
     hot ||
       invariant(
         !baseModels.some(model => model.namespace === namespace),
-        `modelManager.model: namespace should be unique :${model.namespace} ,if use webpack please use register with hot parameter`
+        `modelManager.model: namespace should be unique :${
+          model.namespace
+        } ,if use webpack please use register with hot parameter`
       );
 
     invariant(
@@ -110,10 +118,9 @@ export class SagaModel {
         return Object.keys(reducers).reduce((memo, key) => {
           warning(
             key.indexOf(`${namespace}${SEP}`) !== 0,
-            `modelManager.model: ${type.slice(
-              0,
-              -1
-            )} ${key} should not be prefixed with namespace ${namespace}`
+            `modelManager.model: ${type.slice(0, -1)} ${
+              key
+            } should not be prefixed with namespace ${namespace}`
           );
           memo[`${namespace}${SEP}${key}`] = reducers[key];
           return memo;
@@ -134,6 +141,8 @@ export class SagaModel {
 
     applyNamespace("reducers");
     applyNamespace("sagas");
+
+    console.log(model)
 
     return model;
   }
@@ -192,13 +201,13 @@ export class SagaModel {
       type: "@@saga-model/UPDATE"
     });
 
-    const m = privateProps.models.filter((model)=>{
-      return model.namespace === namespace
+    const m = privateProps.models.filter(model => {
+      return model.namespace === namespace;
     });
 
     // Cancel sagas
-    m &&
-      Object.keys(m.sagas).forEach(key => {
+    m[0] &&
+      Object.keys(m[0].sagas).forEach(key => {
         store.dispatch({
           type: `${key}/@@CANCEL_EFFECTS`
         });
@@ -295,7 +304,7 @@ export class SagaModel {
           });
 
         // delete model
-        privatePropsModels.splice(index,1);
+        privatePropsModels.splice(index, 1);
       }
       privatePropsModels.push(m);
 
@@ -418,7 +427,9 @@ export class SagaModel {
       invariant(type, "dispatch: action should be a plain Object with type");
       warning(
         type.indexOf(`${model.namespace}${SEP}`) !== 0,
-        `dispatch: ${type} should not be prefixed with namespace ${model.namespace}`
+        `dispatch: ${type} should not be prefixed with namespace ${
+          model.namespace
+        }`
       );
       return dispatch({
         ...action,
@@ -465,7 +476,9 @@ export class SagaModel {
       invariant(type, "dispatch: action should be a plain Object with type");
       warning(
         type.indexOf(`${model.namespace}${SEP}`) !== 0,
-        `sagas.put: ${type} should not be prefixed with namespace ${model.namespace}`
+        `sagas.put: ${type} should not be prefixed with namespace ${
+          model.namespace
+        }`
       );
       return sagaEffects.put({
         ...action,
@@ -498,7 +511,9 @@ export class SagaModel {
           const namespaces = fullNamespaces.slice(0, fullNamespaces.length - 1);
           warning(
             namespaces !== model.namespace,
-            `sagas.take: ${pattern} should not be prefixed with namespace ${model.namespace}`
+            `sagas.take: ${pattern} should not be prefixed with namespace ${
+              model.namespace
+            }`
           );
         } else {
           return sagaEffects.take(this.prefixType(pattern, model));
