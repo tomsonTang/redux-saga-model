@@ -1,7 +1,6 @@
-import {SagaModel}  from "../../../src";
+import sagaModel from "../../../src";
 import model, { namespace } from "./model.js";
 
-var sagaModel = new SagaModel({preff:"preff"})
 
 const store = sagaModel.store();
 
@@ -22,10 +21,6 @@ function dispatch() {
 
 dispatch();
 
-// setTimeout(()=>{
-//   console.log('inner timeout');
-//   store.dump(model.namespace)
-// },1000)
 
 store.subscribe(() => {
   console.log("====================================");
