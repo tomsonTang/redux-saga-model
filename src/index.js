@@ -34,7 +34,7 @@ export class SagaModel {
       initialReducer: {},
       initialMiddleware: [],
       initialModels: [],
-      preff: "",
+      prefix: "",
       ...createOpts
     };
 
@@ -71,8 +71,8 @@ export class SagaModel {
     const privateProps = installPrivateProperties[this.__sagaModelKey];
 
     // 预置前缀
-    if (privateProps.preff) {
-      m.namespace = `${privateProps.preff}${SEP}${m.namespace}`;
+    if (privateProps.prefix) {
+      m.namespace = `${privateProps.prefix}${SEP}${m.namespace}`;
     }
     // Clone model to avoid prefixing namespace multiple times
     const model = {
