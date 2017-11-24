@@ -70,10 +70,6 @@ export class SagaModel {
   checkModel(m, baseModels, hot) {
     const privateProps = installPrivateProperties[this.__sagaModelKey];
 
-    // 预置前缀
-    if (privateProps.prefix) {
-      m.namespace = `${privateProps.prefix}${SEP}${m.namespace}`;
-    }
     // Clone model to avoid prefixing namespace multiple times
     const model = {
       ...m
@@ -307,6 +303,8 @@ export class SagaModel {
         privatePropsModels.splice(index, 1);
       }
       privatePropsModels.push(m);
+
+      console.log('[injectModel] privatePropsModels: ',privatePropsModels)
 
       // reducers
       store.asyncReducers[m.namespace] = this.getReducer(
