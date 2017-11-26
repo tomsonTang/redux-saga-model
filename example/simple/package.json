@@ -1,5 +1,5 @@
 {
-  "name": "users-demo",
+  "name": "simple",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "redux-saga-model": "^0.1.31"
   },
   "scripts": {
-    "start": "node ./src/mian.js"
+    "start": "node ./src/main.js"
   },
   "dependencies": {
     "redux": "^3.7.2",

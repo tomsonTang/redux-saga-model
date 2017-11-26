@@ -126,8 +126,8 @@ const mapDispatchToProps = dispatch => {
   return bindActionCreators(action, dispatch);
 };
 
-const mapStateToProps = state => {
-  const usersState = state[dbNamespace];
+const mapStateToProps = (state,props) => {
+  const usersState = state[`${props.prefix}/${dbNamespace}`];
 
   return {
     dataSource: usersState.list,

@@ -46,6 +46,7 @@ export class SagaModel {
       models: this.filterModels(opts.initialModels, []),
       store: null
     };
+
   }
 
   filterModels(models, baseModels) {
@@ -74,6 +75,11 @@ export class SagaModel {
     const model = {
       ...m
     };
+
+    // 添加前缀
+    if (privateProps.prefix) {
+      model.namespace = `${privateProps.prefix}${SEP}${m.namespace}`
+    }
     const { namespace, reducers, sagas } = model;
 
     invariant(namespace, "modelManager.model: namespace should be defined");
@@ -138,8 +144,6 @@ export class SagaModel {
     applyNamespace("reducers");
     applyNamespace("sagas");
 
-    console.log(model)
-
     return model;
   }
 
@@ -153,7 +157,7 @@ export class SagaModel {
 
     const privatePropsModels = privateProps.models;
     if (!Array.isArray(model)) {
-      model = [model];
+      model = [{...model}];
     }
 
     // push when before getStore
@@ -167,6 +171,10 @@ export class SagaModel {
   setHistory(history) {
     installPrivateProperties[this.__sagaModelKey].history = history;
     return this;
+  }
+
+  prefix(){
+    return installPrivateProperties[this.__sagaModelKey].prefix;
   }
 
   history() {
@@ -230,8 +238,6 @@ export class SagaModel {
     privateProps.models = privateProps.models.filter(
       model => model.namespace !== namespace
     );
-
-    console.log(privateProps.models);
 
     return this;
   }
@@ -303,8 +309,6 @@ export class SagaModel {
         privatePropsModels.splice(index, 1);
       }
       privatePropsModels.push(m);
-
-      console.log('[injectModel] privatePropsModels: ',privatePropsModels)
 
       // reducers
       store.asyncReducers[m.namespace] = this.getReducer(
@@ -445,13 +449,22 @@ export class SagaModel {
    */
   prefixType(type, model) {
     const prefixedType = `${model.namespace}${SEP}${type}`;
+    // 当前 namespace 下的功能 type 已包含 namespace
+    if (
+      (model.reducers && model.reducers[type]) ||
+      (model.sagas && model.sagas[type])
+    ) {
+      return type;
+    }
+    // 当前 namespace 下的功能 type 未包含 namespace
     if (
       (model.reducers && model.reducers[prefixedType]) ||
       (model.sagas && model.sagas[prefixedType])
     ) {
       return prefixedType;
     }
-    return type;
+    // 其他 namespace
+    return `${this.prefix()}${SEP}${type}`
   }
 
   /**
@@ -462,7 +475,8 @@ export class SagaModel {
    */
   createEffects(model) {
     /**
-     * 对 saga 的 put 进行封装，默认分发的 action 会补充当前 namespace,且必须是当前 model 存在能够被捕获的 saga 或 reducer
+     * 对 saga 的 put 进行封装，
+     * 默认分发的 action 会补充当前 namespace（包括 prefix）,且必须是当前 model 存在能够被捕获的 saga 或 reducer
      * 否则需要提供 namespace
      *
      * @param {any} action
@@ -481,7 +495,7 @@ export class SagaModel {
       return sagaEffects.put({
         ...action,
         type: namespace
-          ? `${namespace}${SEP}${type}`
+          ? `${this.prefix()}${SEP}${namespace}${SEP}${type}`
           : this.prefixType(type, model)
       });
     }
@@ -725,6 +739,21 @@ export class SagaModel {
       compose(...enhancers)
     ));
 
+    const _dispatch = store.dispatch;
+
+    store.dispatch = function(action){
+      // debugger;
+      if (this.prefix()) {
+        _dispatch({
+          ...action,
+          type:`${this.prefix()}${SEP}${action.type}`
+        })
+      }
+      else{
+        _dispatch(action)
+      }
+    }
+
     function createReducer(asyncReducers) {
       return reducerEnhancer(
         combineReducers({
@@ -773,6 +802,8 @@ export class SagaModel {
     store.register = this::this.register;
     store.dump = this::this.dump;
     store.use = this::this.use;
+    store.prefix = this::this.prefix;
+    store.dispatch = store::store.dispatch
 
     return store;
   }

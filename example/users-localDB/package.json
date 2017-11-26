@@ -1,5 +1,5 @@
 {
-  "name": "users-demo",
+  "name": "users-localdb",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",

@@ -7,8 +7,8 @@ const store = sagaModel.store();
 sagaModel.register([model]);
 sagaModel.use({
   onError:(error,dispatch)=>{
-    console.log('catch-error:')
-    console.log(error);
+    console.info('catch-error:')
+    console.error(error);
   }
 })
 
@@ -26,5 +26,4 @@ store.subscribe(() => {
   console.log("====================================");
   console.log("current state", store.getState());
   console.log("====================================");
-
 });

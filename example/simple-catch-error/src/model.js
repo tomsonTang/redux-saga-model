@@ -19,7 +19,7 @@ export default {
       console.log('get action',action);
       yield delay(1000);
 
-      const a;
+      const a = null;
 
       const i = a.a;
 

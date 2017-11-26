@@ -150,18 +150,15 @@ or
 - **SagaModel** 
   model 处理器类，处理过程与 dva基本相似，入参均为可选：
   - initialState  :Object  传入 createStore 的默认 state
-
   - initialReducer  :Object  不包含在 model 中的其他 reducers
-
   - initialMiddleware :Array  其他 middleware， logging 等各种
-
-  - initialModels :Array  在获取 store 时启动所有的 model，正常情况下推荐使用改默认入参将所有的 model 进行启动，如果需要异步启动可以使用 `sagaModel.register` 方法。
-
+  - initialModels  :Array  在获取 store 时启动所有的 model，正常情况下推荐使用改默认入参将所有的 model 进行启动，如果需要异步启动可以使用 `sagaModel.register` 方法。
   - history  :Object 通过 [`history`](https://github.com/ReactTraining/history) 构造的实例，可以用于在 model 的 substrtions 中使用。
+  - prefix : String 当需要使用多个 store 且将多个 store 进行隔离时使用,使用时会将其作为 namespace 的前缀，故在任意 store 的上下文的 state 中取数据时，需要加上 prefix 前缀。
 
   ```javascript
   import {SagaModel} from 'redux-saga-model';
-  const sagaModel = new SagaModel({initialState, initialReducer, initialMiddleware, initialModels,history});
+  const sagaModel = new SagaModel({initialState, initialReducer, initialMiddleware, initialModels,history,prefix});
 
   const store = sagaModel.store();
   ```
@@ -209,15 +206,24 @@ or
   const plugins = sagaModel.plugin();
   ```
 
+- **sagaModel.prefix**
+   获取初始化时设置的 prefix
+
+   ```javascript
+   import sagaModel from 'redux-saga-model';
+
+   const prefix = sagaModel.prefix();
+   ```
+
 - **sagaModel.setHistory**
-  设置 history
+   设置 history
 
-  ```javascript
-  import createBrowserHistory from "history/createBrowserHistory";
-  import sagaModel from 'redux-saga-model';
+   ```javascript
+   import createBrowserHistory from "history/createBrowserHistory";
+   import sagaModel from 'redux-saga-model';
 
-  sagaModel.setHistory(createBrowserHistory());
-  ```
+   sagaModel.setHistory(createBrowserHistory());
+   ```
 
 - **sagaModel.history**
   获取 history
@@ -261,7 +267,11 @@ or
 
    - models : 可以是单个 model 也可以是数组形式的 models
    - hot :任意非空值 这里的非空是指 not undefined ，not null 你可以设置为 true 或时间戳等任意格式，这里的 hot 代表是否处于热替换状态下，当且仅当在获取 store 后注册 model ,处于热替换状态且下会存在重新执行指定代码块的情况故会重新注册 model。若非热替换状态下(不传 hot 参数)重复注册相同 model则会引发 `namespace 重复 ` 异常。
-   
+
+   注意：
+
+   当使用多个 store 时，在初始化设置了 prefix 后，model 的 register 需要推迟，而不是在实例化 sagaModel 的时候进行入参。
+
    ```javascript
    import sagaModel from 'redux-saga-model';
    import userModel from 'users/userModel';
@@ -307,17 +317,17 @@ or
 - **其他内部 API**
 
 - **store 上的挂载**
-   为了支持方便的异步注册，在 store 上挂载了 `register` 和 `dump` 方法
+   为了支持方便的异步注册，在 store 上挂载了 `register` 、 `dump` 、 `runSaga` 、`prefix`方法
 
    ```javascript
    import sagaModel from 'redux-saga-model';
    const store = sagaModel.store();
 
    //somewhere
-   const {register,dump} = store;
+   const {register,dump,prefix} = store;
 
    //somewhere maybe react
-   const {register,dump} = this.context.store;
+   const {register,dump,prefix} = this.context.store;
    ```
 
    ​
