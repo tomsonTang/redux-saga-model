@@ -75,6 +75,11 @@ export class SagaModel {
       ...m
     };
 
+    // 允许默认不对 state 进行初始化
+    if (!model.state) {
+      model.state = {}
+    }
+
     // 添加前缀
     if (privateProps.prefix) {
       if (model.namespace !== '@@saga-model-prefix') {
@@ -282,6 +287,9 @@ export class SagaModel {
     }
 
     model.forEach(m => {
+      if(Object.prototype.toString.apply(m) === "[object Function]") {
+        m = new m();
+      }
       try {
         m = this.checkModel(m, privatePropsModels, hot);
       } catch (e) {
