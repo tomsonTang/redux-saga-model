@@ -75,9 +75,9 @@ export class SagaModel {
       ...m
     };
 
-    // 允许默认不对 state 进行初始化
-    if (!model.state) {
-      model.state = {}
+    // 不允许不对 state 进行初始化
+    if (model.state === undefined) {
+      console.error(`${model.namespace} model'state should not be undefined!!`)
     }
 
     // 添加前缀
