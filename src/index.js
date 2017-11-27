@@ -46,7 +46,6 @@ export class SagaModel {
       models: this.filterModels(opts.initialModels, []),
       store: null
     };
-
   }
 
   filterModels(models, baseModels) {
@@ -78,7 +77,7 @@ export class SagaModel {
 
     // 添加前缀
     if (privateProps.prefix) {
-      model.namespace = `${privateProps.prefix}${SEP}${m.namespace}`
+      model.namespace = `${privateProps.prefix}${SEP}${m.namespace}`;
     }
     const { namespace, reducers, sagas } = model;
 
@@ -157,7 +156,7 @@ export class SagaModel {
 
     const privatePropsModels = privateProps.models;
     if (!Array.isArray(model)) {
-      model = [{...model}];
+      model = [{ ...model }];
     }
 
     // push when before getStore
@@ -173,7 +172,7 @@ export class SagaModel {
     return this;
   }
 
-  prefix(){
+  prefix() {
     return installPrivateProperties[this.__sagaModelKey].prefix;
   }
 
@@ -464,7 +463,7 @@ export class SagaModel {
       return prefixedType;
     }
     // 其他 namespace
-    return `${this.prefix()}${SEP}${type}`
+    return this.prefix() ? `${this.prefix()}${SEP}${type}` : `${type}`;
   }
 
   /**
@@ -492,11 +491,17 @@ export class SagaModel {
           model.namespace
         }`
       );
+      const newType = namespace
+        ? this.prefix()
+          ? `${this.prefix()}${SEP}${namespace}${SEP}${type}`
+          : `${namespace}${SEP}${type}`
+        : this.prefixType(type, model);
+
+        console.log("newType",newType)
+
       return sagaEffects.put({
         ...action,
-        type: namespace
-          ? `${this.prefix()}${SEP}${namespace}${SEP}${type}`
-          : this.prefixType(type, model)
+        type: newType
       });
     }
 
@@ -741,18 +746,17 @@ export class SagaModel {
 
     const _dispatch = store.dispatch;
 
-    store.dispatch = function(action){
+    store.dispatch = function(action) {
       // debugger;
       if (this.prefix()) {
         _dispatch({
           ...action,
-          type:`${this.prefix()}${SEP}${action.type}`
-        })
+          type: `${this.prefix()}${SEP}${action.type}`
+        });
+      } else {
+        _dispatch(action);
       }
-      else{
-        _dispatch(action)
-      }
-    }
+    };
 
     function createReducer(asyncReducers) {
       return reducerEnhancer(
@@ -803,7 +807,7 @@ export class SagaModel {
     store.dump = this::this.dump;
     store.use = this::this.use;
     store.prefix = this::this.prefix;
-    store.dispatch = store::store.dispatch
+    store.dispatch = store::store.dispatch;
 
     return store;
   }
