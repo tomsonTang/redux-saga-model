@@ -77,7 +77,9 @@ export class SagaModel {
 
     // 添加前缀
     if (privateProps.prefix) {
-      model.namespace = `${privateProps.prefix}${SEP}${m.namespace}`;
+      if (model.namespace !== '@@saga-model-prefix') {
+        model.namespace = `${privateProps.prefix}${SEP}${m.namespace}`;
+      }
     }
     const { namespace, reducers, sagas } = model;
 
@@ -673,6 +675,12 @@ export class SagaModel {
         }
       }
     });
+    // 将当前 prefix 放在 state 中方便使用者直接获取
+    this.register({
+      namespace: "@@saga-model-prefix",
+      state: this.prefix(),
+      reducers: {}
+    });
 
     // get reducers and sagas from model 全局的 sagas
     const sagas = [];
@@ -812,3 +820,4 @@ export class SagaModel {
 }
 
 export default new SagaModel();
+export const prefixStateKey = "@@saga-model-prefix"
