@@ -497,8 +497,6 @@ export class SagaModel {
           : `${namespace}${SEP}${type}`
         : this.prefixType(type, model);
 
-        console.log("newType",newType)
-
       return sagaEffects.put({
         ...action,
         type: newType
