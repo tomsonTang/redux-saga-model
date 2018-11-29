@@ -763,12 +763,12 @@ export class SagaModel {
     store.dispatch = function(action) {
       // debugger;
       if (this.prefix()) {
-        _dispatch({
+        return _dispatch({
           ...action,
           type: `${this.prefix()}${SEP}${action.type}`
         });
       } else {
-        _dispatch(action);
+        return _dispatch(action);
       }
     };
 
